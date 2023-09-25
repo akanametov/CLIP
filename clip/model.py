@@ -255,7 +255,7 @@ class VisionTransformer(nn.Module):
         return x
 
 
-class BERT(nn.Module):
+class TextTransformer(nn.Module):
     def __init__(self, context_length: int, vocab_size: int, width: int, layers: int, heads: int, output_dim: int):
         super().__init__()
         self.context_length = context_length
@@ -349,7 +349,7 @@ class CLIP(nn.Module):
                 output_dim=embed_dim
             )
 
-        self.text_encoder = BERT(
+        self.text_encoder = TextTransformer(
             context_length=context_length,
             vocab_size=vocab_size,
             width=transformer_width,
