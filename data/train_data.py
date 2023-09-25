@@ -2,36 +2,22 @@
 import logging
 from dataclasses import dataclass
 
+import os
+import random
 import json
 import numpy as np
 import pandas as pd
 from PIL import Image
-from torchvision.transforms import Compose, Normalize
+
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.distributed import DistributedSampler
 
-from .classification_datasets import get_dataset, AVALIABLE_CLASSIFICATION_DATASETS
-from training.distributed import is_master
-
-try:
-    import horovod.torch as hvd
-except ImportError:
-    hvd = None
-
-
-try:
-    from refile import smart_open
-    import nori2 as nori
-    import io
-except ImportError:
-    # TODO: remove nori dependency when publish codes
-    pass
-
-
 from torchvision.datasets.coco import CocoCaptions
-import os
-import random
+from torchvision.transforms import Compose, Normalize
+
+from training.distributed import is_master
+from .classification_datasets import get_dataset, AVALIABLE_CLASSIFICATION_DATASETS
 
 
 class ItraDataset(Dataset):
@@ -216,7 +202,11 @@ class PromptedClassificationDataset(Dataset):
 
 
 class CsvDataset(Dataset):
-    def __init__(self, input_filename, transforms, img_key, caption_key, aug=None, sep="\t", dataset_size=None, index_mapping=None, skip_image=False, nori_dataset=False, images_dir=''):
+    def __init__(
+        self,
+        input_filename, transforms, img_key, caption_key,
+        aug=None, sep="\t", dataset_size=None, index_mapping=None, skip_image=False, nori_dataset=False, images_dir='',
+    ):
         logging.debug(f'Loading csv data from {input_filename}.')
         if input_filename[:2]=='s3':
             df = pd.read_csv(smart_open(input_filename, "r"), sep=sep)
@@ -377,10 +367,9 @@ class DataInfo:
     sampler: DistributedSampler
 
 
-def get_data(args, preprocess_fns, index_mapping):
+def load_data(args, preprocess_fns, index_mapping, is_train: bool = True):
     preprocess_fn, _, preprocess_aug = preprocess_fns
-    is_train = True
-    
+
     data = {}
     if args.train_data is not None:
         datasets = []

@@ -1,30 +1,31 @@
 import torch
 import torch.nn as nn
-from .SimReg import SimReg, SimRegL1, SimRegSmoothL1
-from .VICReg import VICReg
+
 from .BarlowTwins import BarlowTwins
-from .RKD import RKD
+from .CLIP import CLIPLoss
 from .CompRess import CompReSS, CompReSSA
-from .CLIP import CLIPLoss, DualCLIPLoss
-from .UniCL import UniCLLoss, CrossEntropy
 from .DINO import DINOLoss
-from .SEED import SEED
 from .ProtoCPC import protocpc_loss
+from .RKD import RKD
+from .SEED import SEED
+from .SimReg import SimReg, SimRegL1, SimRegSmoothL1
+from .UniCL import UniCLLoss, CrossEntropy
+from .VICReg import VICReg
 
 AVALIABLE_LOSS_FUNCTIONS = [
     'SimReg', 'SimReg-L1' ,'SimReg-SmoothL1',
     'VICReg', 'BarlowTwins',
     'RKD','CompRess-1q','CompRess-2q', 'SEED',
-    'InfoNCE', 'DualInfoNCE', 'UniCL' ,'CrossEntropy',
+    'InfoNCE', 'UniCL' ,'CrossEntropy',
     'DINO', 'ProtoCPC'
-    ]
-NEED_LOGIT_SCALE = ['DualInfoNCE', 'InfoNCE', 'UniCL' ,'CrossEntropy']
-NEED_GATHER = ['DualInfoNCE', 'InfoNCE', 'UniCL']
+]
+NEED_LOGIT_SCALE = ['InfoNCE', 'UniCL' ,'CrossEntropy']
+NEED_GATHER = ['InfoNCE', 'UniCL']
 UNI_DIRECTIONAL = ['CompRess-1q', 'SEED', 'DINO', 'ProtoCPC']
 NEED_PROTOTYPE_LAYER = ['DINO', 'ProtoCPC', 'ProtoRKD']
 
 
-def get_loss(args):
+def build_loss(args):
     if args.loss=='SimReg':
         return SimReg
     elif args.loss=='SimReg-L1':
@@ -45,8 +46,6 @@ def get_loss(args):
         return SEED
     elif args.loss=='InfoNCE':
         return CLIPLoss
-    elif args.loss=='DualInfoNCE':
-        return DualCLIPLoss
     elif args.loss=='CrossEntropy':
         return CrossEntropy
     elif args.loss=='UniCL':
