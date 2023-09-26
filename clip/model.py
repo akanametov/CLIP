@@ -294,8 +294,12 @@ class TextTransformer(nn.Module):
         if self.text_projection is not None:
             nn.init.normal_(self.text_projection, std=self.transformer.width ** -0.5)
 
+    @property
+    def dtype(self):
+        return self.token_embedding.weight.dtype
+
     def forward(self, text):
-        x = self.token_embedding(text)  # [batch_size, n_ctx, d_model]
+        x = self.token_embedding(text).type(self.dtype)  # [batch_size, n_ctx, d_model]
         x = x + self.positional_embedding.type(x.dtype)
 
         x = x.permute(1, 0, 2)  # NLD -> LND
@@ -368,7 +372,7 @@ class CLIP(nn.Module):
         return self.image_encoder(image.type(self.dtype))
 
     def encode_text(self, text):
-        return self.text_encoder(text.type(self.dtype))
+        return self.text_encoder(text)
 
     def forward(self, image, text):
         image_features = self.encode_image(image)
